@@ -70,7 +70,7 @@ function ExperiencePage() {
         className="pointer-events-none fixed inset-0 z-10"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 50% 50%, transparent 40%, oklch(0.1 0.004 260 / 0.55) 100%)",
+            "radial-gradient(ellipse 70% 60% at 50% 50%, transparent 55%, oklch(0.1 0.004 260 / 0.35) 100%)",
         }}
         aria-hidden="true"
       />

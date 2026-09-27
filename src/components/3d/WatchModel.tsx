@@ -9,23 +9,18 @@ type Props = { variant: ProductVariant };
 const CASE_R = 0.5;
 const CASE_D = 0.14;
 
-/** Positions + tangent rotations for one bracelet arm along an elliptical arc. */
+/** One bracelet arm: links march away from the lugs and curve back in -z. */
 function braceletLinks(sign: 1 | -1, count: number) {
   const links: { pos: [number, number, number]; rot: number; w: number }[] = [];
   for (let i = 0; i < count; i += 1) {
-    const t = (i + 1) / (count + 1);
-    const angle = sign * t * Math.PI * 0.92;
-    const rx = 0.46;
-    const ry = 1.12;
-    const x = Math.sin(angle) * rx;
-    const y = Math.cos(angle) * ry * sign * sign;
-    const py = sign * (ry * Math.sin((t * Math.PI) / 2) * 0.62 + 0.42);
+    const t = (i + 1) / count;
+    const y = sign * (0.6 + t * 0.6);
+    const z = -(t * t) * 0.62;
     links.push({
-      pos: [x * 0.35, py, -Math.abs(x) * 0.5],
-      rot: angle * 0.55,
-      w: 0.4 - t * 0.12,
+      pos: [0, y, z],
+      rot: sign * t * 1.05,
+      w: 0.34 - t * 0.09,
     });
-    void y;
   }
   return links;
 }
@@ -49,7 +44,7 @@ export function WatchModel({ variant }: Props) {
     [],
   );
 
-  const links = useMemo(() => [...braceletLinks(1, 7), ...braceletLinks(-1, 7)], []);
+  const links = useMemo(() => [...braceletLinks(1, 8), ...braceletLinks(-1, 8)], []);
 
   useFrame((_, delta) => {
     if (secondsRef.current) secondsRef.current.rotation.z -= delta * 0.35;
@@ -68,12 +63,7 @@ export function WatchModel({ variant }: Props) {
     <group>
       {/* ---- Bracelet ---- */}
       {links.map((l, i) => (
-        <mesh
-          key={`link-${i}`}
-          position={l.pos}
-          rotation={[l.rot * 0.9, 0, l.rot * 0.25]}
-          castShadow
-        >
+        <mesh key={`link-${i}`} position={l.pos} rotation={[l.rot, 0, 0]} castShadow>
           <boxGeometry args={[l.w, 0.115, 0.055]} />
           <meshStandardMaterial
             color={variant.metal}
