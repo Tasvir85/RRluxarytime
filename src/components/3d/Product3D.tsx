@@ -4,7 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 import { PRODUCT_MODEL_URL, type ProductVariant } from "@/lib/product-config";
-import { KEYFRAMES, damp, stage } from "@/lib/product-stage";
+import { KEYFRAMES, damp, stage, type Keyframe } from "@/lib/product-stage";
 import { WatchModel } from "./WatchModel";
 
 function GltfProduct({ url }: { url: string }) {

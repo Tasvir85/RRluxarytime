@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
 });
 
 function ExperiencePage() {
-  const [variant, setVariant] = useState(VARIANTS[0]);
+  const [variant, setVariant] = useState(VARIANTS[0]!);
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
