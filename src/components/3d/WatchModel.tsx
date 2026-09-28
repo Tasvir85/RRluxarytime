@@ -9,17 +9,17 @@ type Props = { variant: ProductVariant };
 const CASE_R = 0.5;
 const CASE_D = 0.14;
 
-/** One bracelet arm: links march away from the lugs and curve back in -z. */
+/** One bracelet arm: tightly packed links marching away from the lugs. */
 function braceletLinks(sign: 1 | -1, count: number) {
   const links: { pos: [number, number, number]; rot: number; w: number }[] = [];
   for (let i = 0; i < count; i += 1) {
     const t = (i + 1) / count;
-    const y = sign * (0.6 + t * 0.6);
-    const z = -(t * t) * 0.62;
+    const y = sign * (0.52 + t * 0.66);
+    const z = -(t * t) * 0.42;
     links.push({
       pos: [0, y, z],
-      rot: sign * t * 1.05,
-      w: 0.34 - t * 0.09,
+      rot: sign * t * 0.75,
+      w: 0.3 - t * 0.05,
     });
   }
   return links;
@@ -44,7 +44,7 @@ export function WatchModel({ variant }: Props) {
     [],
   );
 
-  const links = useMemo(() => [...braceletLinks(1, 8), ...braceletLinks(-1, 8)], []);
+  const links = useMemo(() => [...braceletLinks(1, 11), ...braceletLinks(-1, 11)], []);
 
   useFrame((_, delta) => {
     if (secondsRef.current) secondsRef.current.rotation.z -= delta * 0.35;
@@ -64,25 +64,25 @@ export function WatchModel({ variant }: Props) {
       {/* ---- Bracelet ---- */}
       {links.map((l, i) => (
         <mesh key={`link-${i}`} position={l.pos} rotation={[l.rot, 0, 0]} castShadow>
-          <boxGeometry args={[l.w, 0.115, 0.055]} />
+          <boxGeometry args={[l.w, 0.135, 0.075]} />
           <meshStandardMaterial
             color={variant.metal}
-            metalness={1}
-            roughness={0.28}
-            envMapIntensity={1.2}
+            metalness={0.9}
+            roughness={0.52}
+            envMapIntensity={0.55}
           />
         </mesh>
       ))}
 
       {/* ---- Lugs ---- */}
       {[
-        [-0.3, 0.52],
-        [0.3, 0.52],
-        [-0.3, -0.52],
-        [0.3, -0.52],
-      ].map(([x, y], i) => (
+        { x: -0.28, y: 0.44 },
+        { x: 0.28, y: 0.44 },
+        { x: -0.28, y: -0.44 },
+        { x: 0.28, y: -0.44 },
+      ].map(({ x, y }, i) => (
         <mesh key={`lug-${i}`} position={[x, y, 0]} castShadow>
-          <boxGeometry args={[0.1, 0.16, CASE_D * 0.85]} />
+          <boxGeometry args={[0.09, 0.22, CASE_D * 0.8]} />
           {metal}
         </mesh>
       ))}
@@ -186,12 +186,12 @@ export function WatchModel({ variant }: Props) {
       </group>
 
       {/* ---- Sapphire crystal (domed) ---- */}
-      <mesh position={[0, 0, CASE_D / 2 + 0.012]} rotation={[-Math.PI / 2, 0, 0]}>
-        <sphereGeometry args={[0.62, 48, 32, 0, Math.PI * 2, 0, 0.78]} />
+      <mesh position={[0, 0, -0.6]} rotation={[Math.PI / 2, 0, 0]}>
+        <sphereGeometry args={[0.8, 56, 32, 0, Math.PI * 2, 0, 0.58]} />
         <meshPhysicalMaterial
           transparent
           transmission={0.98}
-          thickness={0.12}
+          thickness={0.06}
           roughness={0.02}
           ior={1.76}
           clearcoat={1}

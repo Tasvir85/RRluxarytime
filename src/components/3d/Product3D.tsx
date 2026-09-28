@@ -4,7 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 import { PRODUCT_MODEL_URL, type ProductVariant } from "@/lib/product-config";
-import { KEYFRAMES, damp, stage } from "@/lib/product-stage";
+import { KEYFRAMES, damp, stage, type Keyframe } from "@/lib/product-stage";
 import { WatchModel } from "./WatchModel";
 
 function GltfProduct({ url }: { url: string }) {
@@ -27,6 +27,13 @@ type Props = {
   autoRotate?: number;
 };
 
+const FIRST: Keyframe = KEYFRAMES[0] ?? {
+  position: [0, 0, 0],
+  rotation: [0, 0, 0],
+  scale: 1,
+};
+
+
 /**
  * The product rig: keyframed scroll animation + damped pointer parallax +
  * drag rotation + wheel zoom. All motion is delta-timed and damped, so nothing
@@ -37,13 +44,13 @@ export function Product3D({ variant, autoRotate = 0.12 }: Props) {
   const inner = useRef<THREE.Group>(null);
   const spin = useRef(0);
   const current = useRef({
-    x: KEYFRAMES[0].position[0],
-    y: KEYFRAMES[0].position[1],
-    z: KEYFRAMES[0].position[2],
-    rx: KEYFRAMES[0].rotation[0],
-    ry: KEYFRAMES[0].rotation[1],
-    rz: KEYFRAMES[0].rotation[2],
-    s: KEYFRAMES[0].scale,
+    x: FIRST.position[0],
+    y: FIRST.position[1],
+    z: FIRST.position[2],
+    rx: FIRST.rotation[0],
+    ry: FIRST.rotation[1],
+    rz: FIRST.rotation[2],
+    s: FIRST.scale,
   });
 
   useFrame((_, rawDelta) => {
@@ -55,8 +62,8 @@ export function Product3D({ variant, autoRotate = 0.12 }: Props) {
     const t = THREE.MathUtils.clamp(stage.progress, 0, 1) * span;
     const i = Math.min(Math.floor(t), span - 1);
     const f = THREE.MathUtils.smoothstep(t - i, 0, 1);
-    const a = KEYFRAMES[i];
-    const b = KEYFRAMES[i + 1];
+    const a = KEYFRAMES[i] ?? FIRST;
+    const b = KEYFRAMES[i + 1] ?? a;
     const mix = (u: number, v: number) => u + (v - u) * f;
 
     // --- keyframe targets, nudged by pointer parallax + zoom ---
