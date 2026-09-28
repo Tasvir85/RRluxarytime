@@ -76,11 +76,11 @@ export function WatchModel({ variant }: Props) {
 
       {/* ---- Lugs ---- */}
       {[
-        [-0.3, 0.52],
-        [0.3, 0.52],
-        [-0.3, -0.52],
-        [0.3, -0.52],
-      ].map(([x, y], i) => (
+        { x: -0.3, y: 0.52 },
+        { x: 0.3, y: 0.52 },
+        { x: -0.3, y: -0.52 },
+        { x: 0.3, y: -0.52 },
+      ].map(({ x, y }, i) => (
         <mesh key={`lug-${i}`} position={[x, y, 0]} castShadow>
           <boxGeometry args={[0.1, 0.16, CASE_D * 0.85]} />
           {metal}
