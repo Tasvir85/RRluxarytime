@@ -14,7 +14,7 @@ function braceletLinks(sign: 1 | -1, count: number) {
   const links: { pos: [number, number, number]; rot: number; w: number }[] = [];
   for (let i = 0; i < count; i += 1) {
     const t = (i + 1) / count;
-    const y = sign * (0.5 + t * 0.72);
+    const y = sign * (0.52 + t * 0.66);
     const z = -(t * t) * 0.42;
     links.push({
       pos: [0, y, z],
@@ -67,9 +67,9 @@ export function WatchModel({ variant }: Props) {
           <boxGeometry args={[l.w, 0.135, 0.075]} />
           <meshStandardMaterial
             color={variant.metal}
-            metalness={1}
-            roughness={0.38}
-            envMapIntensity={0.9}
+            metalness={0.9}
+            roughness={0.52}
+            envMapIntensity={0.55}
           />
         </mesh>
       ))}
