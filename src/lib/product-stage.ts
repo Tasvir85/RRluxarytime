@@ -36,7 +36,7 @@ export type Keyframe = {
 /** One keyframe per section — the product is animated between them on scroll. */
 export const KEYFRAMES: Keyframe[] = [
   // Hero — right of the headline, three-quarter view
-  { position: [0.72, 0.05, -0.3], rotation: [0.12, -0.42, 0.05], scale: 0.7 },
+  { position: [0.45, 0.05, -0.3], rotation: [0.12, -0.42, 0.05], scale: 0.7 },
   // Craft — pushed left, tilted to show the case flank
   { position: [-1.05, 0.0, 0.5], rotation: [0.42, 0.55, -0.12], scale: 0.9 },
   // Variants — right, near-flat dial view
