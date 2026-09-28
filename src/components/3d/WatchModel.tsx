@@ -14,11 +14,11 @@ function braceletLinks(sign: 1 | -1, count: number) {
   const links: { pos: [number, number, number]; rot: number; w: number }[] = [];
   for (let i = 0; i < count; i += 1) {
     const t = (i + 1) / count;
-    const y = sign * (0.58 + t * 0.78);
-    const z = -(t * t) * 0.72;
+    const y = sign * (0.5 + t * 0.72);
+    const z = -(t * t) * 0.42;
     links.push({
       pos: [0, y, z],
-      rot: sign * t * 1.15,
+      rot: sign * t * 0.75,
       w: 0.3 - t * 0.05,
     });
   }
@@ -186,12 +186,12 @@ export function WatchModel({ variant }: Props) {
       </group>
 
       {/* ---- Sapphire crystal (domed) ---- */}
-      <mesh position={[0, 0, CASE_D / 2 + 0.012]} rotation={[-Math.PI / 2, 0, 0]}>
-        <sphereGeometry args={[0.62, 48, 32, 0, Math.PI * 2, 0, 0.78]} />
+      <mesh position={[0, 0, CASE_D / 2 - 0.16]} rotation={[-Math.PI / 2, 0, 0]}>
+        <sphereGeometry args={[0.47, 48, 32, 0, Math.PI * 2, 0, 0.62]} />
         <meshPhysicalMaterial
           transparent
           transmission={0.98}
-          thickness={0.12}
+          thickness={0.06}
           roughness={0.02}
           ior={1.76}
           clearcoat={1}
