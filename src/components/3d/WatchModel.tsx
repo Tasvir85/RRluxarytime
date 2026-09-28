@@ -186,8 +186,8 @@ export function WatchModel({ variant }: Props) {
       </group>
 
       {/* ---- Sapphire crystal (domed) ---- */}
-      <mesh position={[0, 0, CASE_D / 2 - 0.16]} rotation={[-Math.PI / 2, 0, 0]}>
-        <sphereGeometry args={[0.47, 48, 32, 0, Math.PI * 2, 0, 0.62]} />
+      <mesh position={[0, 0, -0.6]} rotation={[Math.PI / 2, 0, 0]}>
+        <sphereGeometry args={[0.8, 56, 32, 0, Math.PI * 2, 0, 0.58]} />
         <meshPhysicalMaterial
           transparent
           transmission={0.98}
