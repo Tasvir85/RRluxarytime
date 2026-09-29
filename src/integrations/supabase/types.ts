@@ -14,7 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      product_images: {
+        Row: {
+          created_at: string
+          filename: string
+          height: number | null
+          id: string
+          path: string
+          project_id: string
+          size: number
+          slot: string
+          updated_at: string
+          user_id: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          height?: number | null
+          id?: string
+          path: string
+          project_id: string
+          size: number
+          slot: string
+          updated_at?: string
+          user_id?: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          height?: number | null
+          id?: string
+          path?: string
+          project_id?: string
+          size?: number
+          slot?: string
+          updated_at?: string
+          user_id?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          brand_name: string
+          category: string
+          config: Json
+          created_at: string
+          description: string
+          id: string
+          model_filename: string | null
+          model_path: string | null
+          model_size: number | null
+          model_source: string | null
+          model_status: string
+          model_url: string | null
+          name: string
+          product_name: string
+          published_at: string | null
+          slug: string
+          status: string
+          template: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_name?: string
+          category?: string
+          config?: Json
+          created_at?: string
+          description?: string
+          id?: string
+          model_filename?: string | null
+          model_path?: string | null
+          model_size?: number | null
+          model_source?: string | null
+          model_status?: string
+          model_url?: string | null
+          name: string
+          product_name?: string
+          published_at?: string | null
+          slug: string
+          status?: string
+          template?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          brand_name?: string
+          category?: string
+          config?: Json
+          created_at?: string
+          description?: string
+          id?: string
+          model_filename?: string | null
+          model_path?: string | null
+          model_size?: number | null
+          model_source?: string | null
+          model_status?: string
+          model_url?: string | null
+          name?: string
+          product_name?: string
+          published_at?: string | null
+          slug?: string
+          status?: string
+          template?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
