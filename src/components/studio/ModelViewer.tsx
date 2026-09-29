@@ -5,17 +5,17 @@ import * as THREE from "three";
 import { Maximize2, RotateCcw } from "lucide-react";
 
 class ModelBoundary extends Component<{ children: ReactNode; resetKey: string }, { failed: boolean; key: string }> {
-  state = { failed: false, key: this.props.resetKey };
+  override state = { failed: false, key: this.props.resetKey };
   static getDerivedStateFromError() {
     return { failed: true };
   }
   static getDerivedStateFromProps(p: { resetKey: string }, s: { failed: boolean; key: string }) {
     return p.resetKey !== s.key ? { failed: false, key: p.resetKey } : null;
   }
-  componentDidCatch(e: unknown) {
+  override componentDidCatch(e: unknown) {
     console.error("[ModelViewer] model failed to load", e);
   }
-  render() {
+  override render() {
     if (this.state.failed)
       return (
         <Html center>
