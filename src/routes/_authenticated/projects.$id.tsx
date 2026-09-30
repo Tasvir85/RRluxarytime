@@ -148,7 +148,7 @@ function DetailsTab({ project }: { project: Project }) {
       className="mt-6 grid max-w-2xl gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!f.name.trim()) return toast.error("Project name is required.");
+        if (!f.name.trim()) { toast.error("Project name is required."); return; }
         save.mutate(f, { onSuccess: () => toast.success("Saved") });
       }}
     >
@@ -194,7 +194,7 @@ function PhotosTab({ project }: { project: Project }) {
 
   async function upload(slot: Slot, file: File) {
     const v = await validateImage(file);
-    if ("error" in v) return toast.error(v.error);
+    if ("error" in v) { toast.error(v.error); return; }
     setBusy(slot);
     try {
       const { data: u } = await supabase.auth.getUser();
@@ -224,7 +224,7 @@ function PhotosTab({ project }: { project: Project }) {
   async function remove(img: ProductImage) {
     await supabase.storage.from(BUCKET).remove([img.path]);
     const { error } = await supabase.from("product_images").delete().eq("id", img.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: key });
   }
 
@@ -271,7 +271,7 @@ function ModelTab({ project }: { project: Project }) {
   async function uploadGlb(file: File) {
     setBusy("Checking model…");
     const err = await validateGlb(file);
-    if (err) { setBusy(null); return toast.error(err); }
+    if (err) { setBusy(null); toast.error(err); return; }
     setBusy("Uploading model…");
     try {
       const { data: u } = await supabase.auth.getUser();
@@ -326,7 +326,7 @@ function ModelTab({ project }: { project: Project }) {
           {project.model_filename && <p>File: {project.model_filename} · {formatBytes(project.model_size)}</p>}
         </div>
       </div>
-      <div className="h-[460px] rounded-lg border border-border" style={{ background: BACKGROUNDS.studio!.css }}>
+      <div className="h-[460px] rounded-lg border border-border" style={{ background: BACKGROUNDS["studio"]!.css }}>
         {url ? <ModelViewer url={url} className="h-full w-full" /> : (
           <div className="grid h-full place-items-center text-sm text-muted-foreground">No model yet</div>
         )}
