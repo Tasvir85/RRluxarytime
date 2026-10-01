@@ -18,7 +18,12 @@ export const generate3D = createServerFn({ method: "POST" })
     await sb.from("projects").update({ model_status: "processing" }).eq("id", data.projectId);
     const provider = getProvider("mock");
     try {
-      const job = await provider.generate3DModel({ projectId: data.projectId, imageUrls: [] });
+      const job = await provider.generate3DModel({
+        projectId: data.projectId,
+        imageUrls: [],
+        product: { brand: "", name: "", category: "", description: "" },
+        instructions: "",
+      });
       const status = job.status === "ready" ? job : await provider.getGenerationStatus(job.jobId);
       if (status.status !== "ready" || !status.modelUrl) throw new Error(status.error || "Generation failed");
       const { error } = await sb
