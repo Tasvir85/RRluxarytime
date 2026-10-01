@@ -14,8 +14,176 @@ export type Database = {
   }
   public: {
     Tables: {
+      generation_jobs: {
+        Row: {
+          actual_cost: number | null
+          attempt: number
+          completed_at: string | null
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          estimated_cost: number | null
+          failed_at: string | null
+          id: string
+          input_images: Json
+          job_number: number
+          metadata: Json
+          model_version_id: string | null
+          progress: number
+          project_id: string
+          provider: string
+          provider_job_id: string | null
+          stage: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          attempt?: number
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          estimated_cost?: number | null
+          failed_at?: string | null
+          id?: string
+          input_images?: Json
+          job_number: number
+          metadata?: Json
+          model_version_id?: string | null
+          progress?: number
+          project_id: string
+          provider: string
+          provider_job_id?: string | null
+          stage?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          attempt?: number
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          estimated_cost?: number | null
+          failed_at?: string | null
+          id?: string
+          input_images?: Json
+          job_number?: number
+          metadata?: Json
+          model_version_id?: string | null
+          progress?: number
+          project_id?: string
+          provider?: string
+          provider_job_id?: string | null
+          stage?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_jobs_model_version_id_fkey"
+            columns: ["model_version_id"]
+            isOneToOne: false
+            referencedRelation: "model_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generation_jobs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      model_versions: {
+        Row: {
+          approved_at: string | null
+          created_at: string
+          filename: string | null
+          id: string
+          metadata: Json
+          optimization: Json
+          optimized_path: string | null
+          optimized_size: number | null
+          original_path: string | null
+          original_size: number | null
+          project_id: string
+          provider: string | null
+          quality: string | null
+          source: string
+          status: string
+          thumbnails: Json
+          updated_at: string
+          user_id: string
+          validation: Json
+          version: number
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string
+          filename?: string | null
+          id?: string
+          metadata?: Json
+          optimization?: Json
+          optimized_path?: string | null
+          optimized_size?: number | null
+          original_path?: string | null
+          original_size?: number | null
+          project_id: string
+          provider?: string | null
+          quality?: string | null
+          source: string
+          status?: string
+          thumbnails?: Json
+          updated_at?: string
+          user_id?: string
+          validation?: Json
+          version: number
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string
+          filename?: string | null
+          id?: string
+          metadata?: Json
+          optimization?: Json
+          optimized_path?: string | null
+          optimized_size?: number | null
+          original_path?: string | null
+          original_size?: number | null
+          project_id?: string
+          provider?: string | null
+          quality?: string | null
+          source?: string
+          status?: string
+          thumbnails?: Json
+          updated_at?: string
+          user_id?: string
+          validation?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
+          analysis: Json
           created_at: string
           filename: string
           height: number | null
@@ -29,6 +197,7 @@ export type Database = {
           width: number | null
         }
         Insert: {
+          analysis?: Json
           created_at?: string
           filename: string
           height?: number | null
@@ -42,6 +211,7 @@ export type Database = {
           width?: number | null
         }
         Update: {
+          analysis?: Json
           created_at?: string
           filename?: string
           height?: number | null
@@ -66,6 +236,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          active_model_version_id: string | null
           brand_name: string
           category: string
           config: Json
@@ -88,6 +259,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_model_version_id?: string | null
           brand_name?: string
           category?: string
           config?: Json
@@ -110,6 +282,7 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          active_model_version_id?: string | null
           brand_name?: string
           category?: string
           config?: Json
@@ -131,6 +304,89 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "projects_active_model_version_id_fkey"
+            columns: ["active_model_version_id"]
+            isOneToOne: false
+            referencedRelation: "model_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_events: {
+        Row: {
+          actual_cost: number | null
+          created_at: string
+          duration_ms: number | null
+          estimated_cost: number | null
+          generation_type: string
+          id: string
+          job_id: string | null
+          project_id: string | null
+          provider: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          estimated_cost?: number | null
+          generation_type: string
+          id?: string
+          job_id?: string | null
+          project_id?: string | null
+          provider: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          actual_cost?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          estimated_cost?: number | null
+          generation_type?: string
+          id?: string
+          job_id?: string | null
+          project_id?: string | null
+          provider?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_events_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
         Relationships: []
       }
     }
@@ -138,10 +394,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -268,6 +530,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
