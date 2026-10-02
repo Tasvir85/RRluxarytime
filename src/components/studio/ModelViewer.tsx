@@ -1,4 +1,4 @@
-import { Component, Suspense, useMemo, useRef, type ReactNode } from "react";
+import { Component, Suspense, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, useGLTF, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -54,11 +54,29 @@ function Loading() {
   );
 }
 
-type Props = { url: string; className?: string; controls?: boolean; autoRotate?: boolean };
+export type ModelAngle = "front" | "three-quarter" | "side" | "back" | "top";
 
-export function ModelViewer({ url, className, controls = true, autoRotate = true }: Props) {
+const CAMERA_POSITIONS: Record<ModelAngle, [number, number, number]> = {
+  front: [0, 0.4, 4.2],
+  "three-quarter": [3, 1.1, 3],
+  side: [4.2, 0.4, 0],
+  back: [0, 0.4, -4.2],
+  top: [0, 4.6, 0.1],
+};
+
+type Props = { url: string; className?: string; controls?: boolean; autoRotate?: boolean; angle?: ModelAngle };
+
+export function ModelViewer({ url, className, controls = true, autoRotate = true, angle = "front" }: Props) {
   const orbit = useRef<React.ComponentRef<typeof OrbitControls>>(null);
   const wrap = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const controlsRef = orbit.current;
+    if (!controlsRef) return;
+    controlsRef.object.position.set(...CAMERA_POSITIONS[angle]);
+    controlsRef.target.set(0, 0, 0);
+    controlsRef.update();
+  }, [angle]);
 
   return (
     <div ref={wrap} className={`relative bg-transparent ${className ?? ""}`}>
@@ -85,7 +103,7 @@ export function ModelViewer({ url, className, controls = true, autoRotate = true
         <ContactShadows position={[0, -1.05, 0]} opacity={0.45} blur={2.6} scale={6} far={2} />
         <OrbitControls
           ref={orbit}
-          enablePan={false}
+          enablePan={controls}
           enableDamping
           dampingFactor={0.08}
           minDistance={2.4}

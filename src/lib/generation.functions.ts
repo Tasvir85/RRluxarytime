@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import { getProvider } from "@/services/3d/providers";
 
 const projectInput = z.object({ projectId: z.string().uuid() });
@@ -15,7 +17,7 @@ const uploadInput = z.object({
 });
 
 async function requireOwnedProject(
-  supabase: Parameters<Parameters<typeof requireSupabaseAuth>["server"]>[0] extends never ? never : any,
+  supabase: SupabaseClient<Database>,
   projectId: string,
 ) {
   const { data, error } = await supabase.from("projects").select("id").eq("id", projectId).maybeSingle();
