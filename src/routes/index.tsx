@@ -6,11 +6,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ProductScene } from "@/components/3d/ProductScene";
 import {
   Collection,
+  BackgroundSelector,
   Craft,
   Hero,
   Movement,
   Nav,
   Variants,
+  type StageBackground,
 } from "@/components/site/Sections";
 import { PRODUCT, VARIANTS } from "@/lib/product-config";
 import { stage } from "@/lib/product-stage";
@@ -37,6 +39,7 @@ export const Route = createFileRoute("/")({
 
 function ExperiencePage() {
   const [variant, setVariant] = useState(VARIANTS[0]!);
+  const [background, setBackground] = useState<StageBackground>("obsidian");
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,7 +56,7 @@ function ExperiencePage() {
   }, []);
 
   return (
-    <div ref={scroller} className="relative">
+    <div ref={scroller} className={`stage-${background} relative transition-colors duration-700`}>
       <ProductScene variant={variant} />
 
       <div className="pointer-events-none relative z-20">
@@ -64,6 +67,7 @@ function ExperiencePage() {
         <Movement />
         <Collection active={variant} />
       </div>
+      <BackgroundSelector value={background} onChange={setBackground} />
 
       {/* Subtle vignette keeps the product the brightest thing on screen */}
       <div

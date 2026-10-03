@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, Compass, Gem, Hand, Layers } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Check, Compass, Gem, Hand, Layers, Palette } from "lucide-react";
 import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,46 @@ const fade = {
 const scrollToSection = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 };
+
+export type StageBackground = "obsidian" | "pearl" | "burgundy";
+
+const BACKGROUNDS: { id: StageBackground; label: string; swatch: string }[] = [
+  { id: "obsidian", label: "Obsidian", swatch: "bg-stage-obsidian" },
+  { id: "pearl", label: "Pearl", swatch: "bg-stage-pearl" },
+  { id: "burgundy", label: "Burgundy", swatch: "bg-stage-burgundy" },
+];
+
+export function BackgroundSelector({
+  value,
+  onChange,
+}: {
+  value: StageBackground;
+  onChange: (background: StageBackground) => void;
+}) {
+  return (
+    <div className="pointer-events-auto fixed right-5 bottom-5 z-30 flex items-center gap-1 rounded-full border border-border bg-card/80 p-1.5 shadow-lg backdrop-blur-md md:right-10 md:bottom-8">
+      <Palette className="mx-1 size-3.5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+      {BACKGROUNDS.map((background) => (
+        <Button
+          key={background.id}
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => onChange(background.id)}
+          aria-label={`${background.label} background`}
+          aria-pressed={value === background.id}
+          title={background.label}
+          className="relative size-8 rounded-full hover:bg-secondary"
+        >
+          <span className={cn("size-4 rounded-full border border-border", background.swatch)} />
+          {value === background.id ? (
+            <Check className="absolute size-3 text-foreground drop-shadow" strokeWidth={2.5} />
+          ) : null}
+        </Button>
+      ))}
+    </div>
+  );
+}
 
 export function Nav() {
   return (

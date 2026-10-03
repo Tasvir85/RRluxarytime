@@ -9,17 +9,34 @@ type Props = { variant: ProductVariant };
 const CASE_R = 0.5;
 const CASE_D = 0.14;
 
-/** One bracelet arm: tightly packed links marching away from the lugs. */
-function braceletLinks(sign: 1 | -1, count: number) {
-  const links: { pos: [number, number, number]; rot: number; w: number }[] = [];
+type BraceletLink = {
+  pos: [number, number, number];
+  rot: number;
+  width: number;
+};
+
+/**
+ * One half of a closed bracelet. A quadratic curve lets the band leave the
+ * lugs naturally, bow around the wrist, and meet the clasp behind the case.
+ */
+function braceletLinks(sign: 1 | -1, count: number): BraceletLink[] {
+  const links: BraceletLink[] = [];
   for (let i = 0; i < count; i += 1) {
-    const t = (i + 1) / count;
-    const y = sign * (0.52 + t * 0.66);
-    const z = -(t * t) * 0.42;
+    const t = (i + 0.35) / count;
+    const inverse = 1 - t;
+    const startY = sign * 0.52;
+    const controlY = sign * 1.38;
+    const endY = 0;
+    const controlZ = -0.24;
+    const endZ = -1.3;
+    const y = inverse * inverse * startY + 2 * inverse * t * controlY + t * t * endY;
+    const z = 2 * inverse * t * controlZ + t * t * endZ;
+    const tangentY = 2 * inverse * (controlY - startY) + 2 * t * (endY - controlY);
+    const tangentZ = 2 * inverse * controlZ + 2 * t * (endZ - controlZ);
     links.push({
       pos: [0, y, z],
-      rot: sign * t * 0.75,
-      w: 0.3 - t * 0.05,
+      rot: Math.atan2(tangentZ, tangentY),
+      width: 0.34 - t * 0.06,
     });
   }
   return links;
@@ -46,7 +63,7 @@ export function WatchModel({ variant }: Props) {
     [],
   );
 
-  const links = useMemo(() => [...braceletLinks(1, 11), ...braceletLinks(-1, 11)], []);
+  const links = useMemo(() => [...braceletLinks(1, 13), ...braceletLinks(-1, 13)], []);
 
   useFrame(() => {
     const now = new Date();
@@ -71,17 +88,36 @@ export function WatchModel({ variant }: Props) {
   return (
     <group>
       {/* ---- Bracelet ---- */}
-      {links.map((l, i) => (
-        <mesh key={`link-${i}`} position={l.pos} rotation={[l.rot, 0, 0]} castShadow>
-          <boxGeometry args={[l.w, 0.135, 0.075]} />
-          <meshStandardMaterial
-            color={variant.metal}
-            metalness={0.9}
-            roughness={0.52}
-            envMapIntensity={0.55}
-          />
+      {links.map((link, row) =>
+        [-1, 0, 1].map((column) => (
+          <mesh
+            key={`link-${row}-${column}`}
+            position={[column * link.width * 0.33, link.pos[1], link.pos[2]]}
+            rotation={[link.rot, 0, 0]}
+            castShadow
+          >
+            <boxGeometry args={[link.width * 0.29, 0.128, 0.085]} />
+            <meshStandardMaterial
+              color={column === 0 ? variant.accent : variant.metal}
+              metalness={1}
+              roughness={column === 0 ? 0.2 : 0.34}
+              envMapIntensity={column === 0 ? 1.7 : 1.15}
+            />
+          </mesh>
+        )),
+      )}
+
+      {/* Folding clasp closes the two bracelet halves behind the watch. */}
+      <group position={[0, 0, -1.29]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.34, 0.18, 0.1]} />
+          <meshStandardMaterial color={variant.metal} metalness={1} roughness={0.18} envMapIntensity={1.6} />
         </mesh>
-      ))}
+        <mesh position={[0, 0.052, 0]}>
+          <boxGeometry args={[0.12, 0.012, 0.055]} />
+          <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.14} />
+        </mesh>
+      </group>
 
       {/* ---- Lugs ---- */}
       {[
@@ -172,15 +208,23 @@ export function WatchModel({ variant }: Props) {
 
       {/* ---- Hands ---- */}
       <group ref={hourRef} position={[0, 0, CASE_D / 2 + 0.002]}>
+        <mesh position={[0, 0.11, -0.002]}>
+          <boxGeometry args={[0.044, 0.25, 0.006]} />
+          <meshStandardMaterial color={variant.dial} metalness={0.15} roughness={0.5} />
+        </mesh>
         <mesh position={[0, 0.11, 0]}>
-          <boxGeometry args={[0.026, 0.24, 0.008]} />
-          <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.15} />
+          <boxGeometry args={[0.032, 0.235, 0.01]} />
+          <meshStandardMaterial color={variant.accent} metalness={0.82} roughness={0.12} emissive={variant.accent} emissiveIntensity={0.2} />
         </mesh>
       </group>
       <group ref={minuteRef} position={[0, 0, CASE_D / 2 + 0.012]}>
+        <mesh position={[0, 0.16, -0.002]}>
+          <boxGeometry args={[0.036, 0.35, 0.006]} />
+          <meshStandardMaterial color={variant.dial} metalness={0.15} roughness={0.5} />
+        </mesh>
         <mesh position={[0, 0.16, 0]}>
-          <boxGeometry args={[0.018, 0.34, 0.007]} />
-          <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.15} />
+          <boxGeometry args={[0.024, 0.335, 0.009]} />
+          <meshStandardMaterial color={variant.accent} metalness={0.82} roughness={0.12} emissive={variant.accent} emissiveIntensity={0.2} />
         </mesh>
       </group>
       <group ref={secondsRef} position={[0, 0, CASE_D / 2 + 0.02]}>
