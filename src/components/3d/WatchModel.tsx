@@ -26,6 +26,8 @@ function braceletLinks(sign: 1 | -1, count: number) {
 }
 
 export function WatchModel({ variant }: Props) {
+  const hourRef = useRef<THREE.Group>(null);
+  const minuteRef = useRef<THREE.Group>(null);
   const secondsRef = useRef<THREE.Group>(null);
 
   const markers = useMemo(
@@ -46,8 +48,15 @@ export function WatchModel({ variant }: Props) {
 
   const links = useMemo(() => [...braceletLinks(1, 11), ...braceletLinks(-1, 11)], []);
 
-  useFrame((_, delta) => {
-    if (secondsRef.current) secondsRef.current.rotation.z -= delta * 0.35;
+  useFrame(() => {
+    const now = new Date();
+    const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+    const minutes = now.getMinutes() + seconds / 60;
+    const hours = (now.getHours() % 12) + minutes / 60;
+
+    if (hourRef.current) hourRef.current.rotation.z = -(hours / 12) * Math.PI * 2;
+    if (minuteRef.current) minuteRef.current.rotation.z = -(minutes / 60) * Math.PI * 2;
+    if (secondsRef.current) secondsRef.current.rotation.z = -(seconds / 60) * Math.PI * 2;
   });
 
   const metal = (
@@ -162,13 +171,13 @@ export function WatchModel({ variant }: Props) {
       </mesh>
 
       {/* ---- Hands ---- */}
-      <group position={[0, 0, CASE_D / 2 + 0.002]} rotation={[0, 0, -0.9]}>
+      <group ref={hourRef} position={[0, 0, CASE_D / 2 + 0.002]}>
         <mesh position={[0, 0.11, 0]}>
           <boxGeometry args={[0.026, 0.24, 0.008]} />
           <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.15} />
         </mesh>
       </group>
-      <group position={[0, 0, CASE_D / 2 + 0.012]} rotation={[0, 0, 1.8]}>
+      <group ref={minuteRef} position={[0, 0, CASE_D / 2 + 0.012]}>
         <mesh position={[0, 0.16, 0]}>
           <boxGeometry args={[0.018, 0.34, 0.007]} />
           <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.15} />

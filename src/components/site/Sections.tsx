@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUpRight, Compass, Gem, Hand, Layers } from "lucide-react";
 import { motion } from "motion/react";
 
+import { Button } from "@/components/ui/button";
 import { PRODUCT, SPECS, VARIANTS, type ProductVariant } from "@/lib/product-config";
 import { cn } from "@/lib/utils";
 
@@ -11,26 +12,33 @@ const fade = {
   transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] as const },
 };
 
+const scrollToSection = (id: string) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
 export function Nav() {
   return (
     <header className="pointer-events-none fixed top-0 right-0 left-0 z-30 flex items-center justify-between px-6 py-6 md:px-12">
       <span className="font-display text-sm tracking-[0.42em] uppercase">{PRODUCT.brand}</span>
       <span className="eyebrow hidden md:inline">{PRODUCT.model}</span>
-      <button
+      <Button
         type="button"
-        className="pointer-events-auto eyebrow border-b border-transparent pb-0.5 text-foreground transition-colors hover:border-primary hover:text-primary"
+        variant="ghost"
+        size="sm"
+        onClick={() => scrollToSection("acquire")}
+        className="pointer-events-auto eyebrow h-auto rounded-none border-b border-transparent px-0 pb-0.5 text-foreground shadow-none hover:border-primary hover:bg-transparent hover:text-primary"
       >
         Enquire
-      </button>
+      </Button>
     </header>
   );
 }
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-screen items-center">
+    <section id="hero" className="relative flex min-h-screen scroll-mt-0 items-center">
       <div className="w-full px-6 md:px-12">
-        <motion.div {...fade} className="max-w-xl">
+        <motion.div {...fade} className="max-w-[34rem] md:max-w-[52vw] lg:max-w-xl">
           <p className="eyebrow">Reference MR-01 — Automatic</p>
           <h1 className="mt-6 font-display text-[clamp(2.6rem,6.4vw,5.2rem)] leading-[0.95] tracking-[-0.03em] uppercase">
             Designed to be
@@ -40,18 +48,21 @@ export function Hero() {
             {PRODUCT.tagline}
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <button
+            <Button
               type="button"
-              className="pointer-events-auto rounded-full bg-primary px-7 py-3 text-[0.7rem] font-medium tracking-[0.22em] text-primary-foreground uppercase transition-transform duration-300 hover:scale-[1.03]"
+              onClick={() => scrollToSection("craft")}
+              className="pointer-events-auto h-auto rounded-full px-7 py-3 text-[0.7rem] font-medium tracking-[0.22em] uppercase transition-transform duration-300 hover:scale-[1.03]"
             >
               Explore product
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="pointer-events-auto rounded-full border border-border px-7 py-3 text-[0.7rem] font-medium tracking-[0.22em] uppercase transition-colors duration-300 hover:border-primary hover:text-primary"
+              variant="outline"
+              onClick={() => scrollToSection("variants")}
+              className="pointer-events-auto h-auto rounded-full bg-transparent px-7 py-3 text-[0.7rem] font-medium tracking-[0.22em] uppercase shadow-none hover:border-primary hover:bg-transparent hover:text-primary"
             >
               Discover the collection
-            </button>
+            </Button>
           </div>
         </motion.div>
       </div>
@@ -70,7 +81,7 @@ export function Hero() {
 
 export function Craft() {
   return (
-    <section className="relative flex min-h-screen items-center justify-end">
+    <section id="craft" className="relative flex min-h-screen scroll-mt-0 items-center justify-end">
       <div className="w-full px-6 md:w-1/2 md:px-12">
         <motion.div {...fade}>
           <p className="eyebrow">01 — Craft</p>
@@ -99,7 +110,7 @@ export function Variants({
   onSelect: (v: ProductVariant) => void;
 }) {
   return (
-    <section className="relative flex min-h-screen items-center">
+    <section id="variants" className="relative flex min-h-screen scroll-mt-0 items-center">
       <div className="w-full px-6 md:w-1/2 md:px-12">
         <motion.div {...fade}>
           <p className="eyebrow">02 — The line</p>
@@ -152,7 +163,7 @@ export function Movement() {
     { icon: Compass, title: "±2 s / day", copy: "Chronometer-certified in five positions." },
   ];
   return (
-    <section className="relative flex min-h-screen flex-col justify-end pb-20">
+    <section id="movement" className="relative flex min-h-screen scroll-mt-0 flex-col justify-end pb-20">
       <div className="px-6 md:px-12">
         <motion.p {...fade} className="eyebrow">
           03 — The movement
@@ -175,7 +186,7 @@ export function Movement() {
 
 export function Collection({ active }: { active: ProductVariant }) {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-end pb-14 text-center">
+    <section id="acquire" className="relative flex min-h-screen scroll-mt-0 flex-col items-center justify-end pb-14 text-center">
       <motion.div {...fade} className="px-6">
         <p className="eyebrow">04 — Acquire</p>
         <h2 className="mt-5 font-display text-[clamp(2rem,4.6vw,3.6rem)] leading-[1] tracking-[-0.03em] uppercase">
