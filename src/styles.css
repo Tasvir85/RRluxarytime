@@ -79,6 +79,10 @@
   --hairline: oklch(1 0 0 / 8%);
   --glow: oklch(0.82 0.095 88 / 18%);
 
+  --stage-base: oklch(0.145 0.004 260);
+  --stage-highlight: oklch(0.26 0.008 255);
+  --stage-edge: oklch(0.11 0.004 260);
+
   --gradient-stage: radial-gradient(
     ellipse 70% 55% at 50% 42%,
     oklch(0.26 0.008 255) 0%,
@@ -92,6 +96,42 @@
     oklch(0.74 0.08 78)
   );
   --shadow-lift: 0 30px 80px -40px oklch(0 0 0 / 80%);
+}
+
+.stage-obsidian {
+  --stage-base: oklch(0.145 0.004 260);
+  --stage-highlight: oklch(0.26 0.008 255);
+  --stage-edge: oklch(0.11 0.004 260);
+  background-color: var(--stage-base);
+  background-image: radial-gradient(ellipse 70% 55% at 50% 42%, var(--stage-highlight), var(--stage-base) 62%, var(--stage-edge));
+}
+
+.stage-pearl {
+  --stage-base: oklch(0.28 0.012 80);
+  --stage-highlight: oklch(0.42 0.025 82);
+  --stage-edge: oklch(0.18 0.01 75);
+  background-color: var(--stage-base);
+  background-image: radial-gradient(ellipse 70% 55% at 58% 42%, var(--stage-highlight), var(--stage-base) 62%, var(--stage-edge));
+}
+
+.stage-burgundy {
+  --stage-base: oklch(0.19 0.035 20);
+  --stage-highlight: oklch(0.31 0.055 25);
+  --stage-edge: oklch(0.12 0.02 18);
+  background-color: var(--stage-base);
+  background-image: radial-gradient(ellipse 70% 55% at 58% 42%, var(--stage-highlight), var(--stage-base) 62%, var(--stage-edge));
+}
+
+.bg-stage-obsidian {
+  background: oklch(0.17 0.006 260);
+}
+
+.bg-stage-pearl {
+  background: oklch(0.48 0.03 82);
+}
+
+.bg-stage-burgundy {
+  background: oklch(0.28 0.06 22);
 }
 
 @layer base {
