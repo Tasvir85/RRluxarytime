@@ -2,8 +2,13 @@ import { ArrowDown, ArrowUpRight, Check, Compass, Gem, Hand, Layers, Palette } f
 import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
+import { OutfitStylist } from "@/components/site/OutfitStylist";
 import { PRODUCT, SPECS, VARIANTS, type ProductVariant } from "@/lib/product-config";
 import { cn } from "@/lib/utils";
+import packagingFront from "@/assets/meridian-packaging-front.jpg";
+import braceletDetail from "@/assets/meridian-bracelet-detail.jpg";
+import packagingTop from "@/assets/meridian-packaging-top.jpg";
+import boxClose from "@/assets/meridian-box-close.jpg";
 
 const fade = {
   initial: { opacity: 0, y: 24 },
@@ -90,7 +95,7 @@ export function Hero() {
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <Button
               type="button"
-              onClick={() => scrollToSection("craft")}
+              onClick={() => scrollToSection("product-gallery")}
               className="pointer-events-auto h-auto rounded-full px-7 py-3 text-[0.7rem] font-medium tracking-[0.22em] uppercase transition-transform duration-300 hover:scale-[1.03]"
             >
               Explore product
@@ -114,6 +119,36 @@ export function Hero() {
         <span className="eyebrow hidden items-center gap-2 md:flex">
           <Hand className="size-3.5" strokeWidth={1.5} /> Drag to rotate
         </span>
+      </div>
+    </section>
+  );
+}
+
+const PRODUCT_VIEWS = [
+  { src: packagingFront, label: "Meridian and presentation case" },
+  { src: braceletDetail, label: "Wide five-link bracelet and polished case" },
+  { src: packagingTop, label: "Complete Meridian presentation set" },
+  { src: boxClose, label: "Meridian in its lacquer presentation case" },
+] as const;
+
+export function ProductGallery() {
+  return (
+    <section id="product-gallery" className="relative flex min-h-screen scroll-mt-0 items-center py-24">
+      <div className="w-full px-6 md:px-12">
+        <motion.div {...fade} className="max-w-xl">
+          <p className="eyebrow">The complete presentation</p>
+          <h2 className="mt-4 font-display text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.05]">Crafted beyond the case.</h2>
+        </motion.div>
+        <motion.div {...fade} className="mt-8 grid max-w-[70rem] grid-cols-2 gap-2 md:w-[64%] md:gap-3">
+          {PRODUCT_VIEWS.map((view, index) => (
+            <figure key={view.src} className="group relative aspect-[4/3] overflow-hidden rounded-sm border border-hairline bg-card">
+              <img src={view.src} alt={view.label} width={1280} height={960} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.025]" />
+              <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent px-3 pt-8 pb-3 text-[0.62rem] tracking-[0.12em] text-foreground uppercase">
+                0{index + 1} · {view.label}
+              </figcaption>
+            </figure>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
@@ -145,9 +180,11 @@ export function Craft() {
 export function Variants({
   active,
   onSelect,
+  onStyleApply,
 }: {
   active: ProductVariant;
   onSelect: (v: ProductVariant) => void;
+  onStyleApply: (variant: ProductVariant, background: StageBackground) => void;
 }) {
   return (
     <section id="variants" className="relative flex min-h-screen scroll-mt-0 items-center">
@@ -189,6 +226,9 @@ export function Variants({
                 </button>
               );
             })}
+          </div>
+          <div className="pointer-events-auto mt-6">
+            <OutfitStylist onApply={onStyleApply} />
           </div>
         </motion.div>
       </div>
