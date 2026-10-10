@@ -11,6 +11,7 @@ import {
   Hero,
   Movement,
   Nav,
+  ProductGallery,
   Variants,
   type StageBackground,
 } from "@/components/site/Sections";
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/")({
 });
 
 function ExperiencePage() {
-  const [variant, setVariant] = useState(VARIANTS[0]!);
+  const [variant, setVariant] = useState(VARIANTS[2]!);
   const [background, setBackground] = useState<StageBackground>("obsidian");
   const scroller = useRef<HTMLDivElement>(null);
 
@@ -62,8 +63,16 @@ function ExperiencePage() {
       <div className="pointer-events-none relative z-20">
         <Nav />
         <Hero />
+        <ProductGallery />
         <Craft />
-        <Variants active={variant} onSelect={setVariant} />
+        <Variants
+          active={variant}
+          onSelect={setVariant}
+          onStyleApply={(recommendedVariant, recommendedBackground) => {
+            setVariant(recommendedVariant);
+            setBackground(recommendedBackground);
+          }}
+        />
         <Movement />
         <Collection active={variant} />
       </div>
