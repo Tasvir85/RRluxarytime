@@ -11,18 +11,17 @@ const CASE_R = 0.5;
 const CASE_D = 0.14;
 
 /** Bracelet geometry — five-row jubilee-style band matched to the packaging watch. */
-const BAND_W0 = 0.56; // width at the end links (fills the lug gap)
-const BAND_TAPER = 0.08; // narrower towards the clasp
-const ROWS = 18; // links per half
-const GAP = 0.0075;
+const BAND_W0 = 0.64; // substantial 25.6mm end link relative to the 40mm case
+const BAND_TAPER = 0.09;
+const ROWS = 22;
 
 type Column = { kind: "outer" | "polished" | "center"; offset: number; frac: number; stagger: boolean };
 const COLUMNS: Column[] = [
-  { kind: "outer", offset: -0.365, frac: 0.27, stagger: false },
-  { kind: "polished", offset: -0.1575, frac: 0.13, stagger: true },
-  { kind: "center", offset: 0, frac: 0.17, stagger: false },
-  { kind: "polished", offset: 0.1575, frac: 0.13, stagger: true },
-  { kind: "outer", offset: 0.365, frac: 0.27, stagger: false },
+  { kind: "outer", offset: -0.355, frac: 0.28, stagger: false },
+  { kind: "polished", offset: -0.145, frac: 0.13, stagger: true },
+  { kind: "center", offset: 0, frac: 0.15, stagger: true },
+  { kind: "polished", offset: 0.145, frac: 0.13, stagger: true },
+  { kind: "outer", offset: 0.355, frac: 0.28, stagger: false },
 ];
 
 type Link = { key: string; kind: Column["kind"]; pos: [number, number, number]; rot: number; scaleX: number };
@@ -31,7 +30,7 @@ type Link = { key: string; kind: Column["kind"]; pos: [number, number, number]; 
 function bandCurve(sign: 1 | -1) {
   return new THREE.CatmullRomCurve3(
     [
-      new THREE.Vector3(0, sign * 0.63, -0.01),
+      new THREE.Vector3(0, sign * 0.59, -0.01),
       new THREE.Vector3(0, sign * 0.86, -0.17),
       new THREE.Vector3(0, sign * 0.98, -0.56),
       new THREE.Vector3(0, sign * 0.9, -1.02),
@@ -67,7 +66,7 @@ function buildBand(): { links: Link[]; step: number } {
           key: `${sign}-${column.kind}-${column.offset}-${i}`,
           kind: column.kind,
           pos: [column.offset * width, p.y, p.z],
-          rot: Math.atan2(tangent.z, tangent.y),
+           rot: Math.atan2(tangent.z, tangent.y) + (sign === -1 ? Math.PI : 0),
           scaleX: width / BAND_W0,
         });
       }
@@ -103,12 +102,14 @@ export function WatchModel({ variant }: Props) {
   const geo = useMemo(() => {
     const s = band.step;
     return {
-      outer: new RoundedBoxGeometry(BAND_W0 * 0.27, s * 0.97, 0.078, 3, 0.022),
-      polished: new RoundedBoxGeometry(BAND_W0 * 0.13, s * 0.9, 0.09, 3, 0.03),
-      center: new RoundedBoxGeometry(BAND_W0 * 0.17, s * 0.94, 0.08, 3, 0.022),
-      endLink: new RoundedBoxGeometry(BAND_W0 + GAP, 0.2, 0.12, 4, 0.035),
-      claspBase: new RoundedBoxGeometry(0.5, 0.44, 0.05, 4, 0.02),
-      claspCover: new RoundedBoxGeometry(0.4, 0.38, 0.026, 4, 0.012),
+      outer: new RoundedBoxGeometry(BAND_W0 * 0.28, s * 0.985, 0.085, 3, 0.008),
+      polished: new RoundedBoxGeometry(BAND_W0 * 0.13, s * 0.98, 0.092, 3, 0.009),
+      center: new RoundedBoxGeometry(BAND_W0 * 0.15, s * 0.98, 0.092, 3, 0.009),
+      endLink: new RoundedBoxGeometry(BAND_W0, 0.12, 0.072, 3, 0.008),
+      endShoulder: new RoundedBoxGeometry(BAND_W0 * 0.28, 0.17, 0.09, 3, 0.009),
+      endCenter: new RoundedBoxGeometry(BAND_W0 * 0.13, 0.13, 0.016, 3, 0.004),
+      claspBase: new RoundedBoxGeometry(0.55, 0.42, 0.062, 3, 0.009),
+      claspCover: new RoundedBoxGeometry(0.53, 0.36, 0.025, 3, 0.006),
     };
   }, [band.step]);
 
@@ -116,15 +117,17 @@ export function WatchModel({ variant }: Props) {
     () => ({
       brushed: new THREE.MeshStandardMaterial({
         color: variant.metal,
-        metalness: 0.86,
-        roughness: 0.4,
-        envMapIntensity: 1.5,
+        metalness: 1,
+        roughness: 0.31,
+        envMapIntensity: 1.4,
       }),
-      polished: new THREE.MeshStandardMaterial({
+      polished: new THREE.MeshPhysicalMaterial({
         color: variant.metal,
-        metalness: 0.95,
-        roughness: 0.22,
-        envMapIntensity: 1.9,
+        metalness: 1,
+        roughness: 0.14,
+        clearcoat: 0.4,
+        clearcoatRoughness: 0.12,
+        envMapIntensity: 1.6,
       }),
     }),
     [variant.metal],
@@ -157,7 +160,7 @@ export function WatchModel({ variant }: Props) {
         <mesh
           key={link.key}
           geometry={geo[link.kind]}
-          material={link.kind === "polished" ? mats.polished : mats.brushed}
+           material={link.kind === "outer" ? mats.brushed : mats.polished}
           position={link.pos}
           rotation={[link.rot, 0, 0]}
           scale={[link.scaleX, 1, 1]}
@@ -167,13 +170,21 @@ export function WatchModel({ variant }: Props) {
 
       {/* Solid end links fill the lug gap and join the band to the case. */}
       {[1, -1].map((sign) => (
-        <group key={`end-link-${sign}`} position={[0, sign * 0.535, -0.01]}>
+        <group key={`end-link-${sign}`} position={[0, sign * 0.515, -0.01]}>
           <mesh geometry={geo.endLink} material={mats.brushed} castShadow />
+          {[-1, 1].map((side) => (
+            <mesh key={side} geometry={geo.endShoulder} material={mats.brushed}
+              position={[side * 0.355 * BAND_W0, sign * 0.015, 0.008]} castShadow />
+          ))}
+          {[-0.145, 0, 0.145].map((offset) => (
+            <mesh key={offset} geometry={geo.endCenter} material={mats.polished}
+              position={[offset * BAND_W0, sign * 0.012, 0.043]} castShadow />
+          ))}
         </group>
       ))}
 
       {/* Folding deployant clasp joining both halves under the wrist. */}
-      <group position={[0, 0, -1.64]}>
+      <group position={[0, 0, -1.575]}>
         <mesh geometry={geo.claspBase} material={mats.brushed} castShadow />
         <mesh geometry={geo.claspCover} material={mats.polished} position={[0, 0, -0.03]} />
         <mesh position={[0, 0.12, -0.045]}>
@@ -181,7 +192,7 @@ export function WatchModel({ variant }: Props) {
           <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.14} />
         </mesh>
         {[-1, 1].map((side) => (
-          <mesh key={`clasp-edge-${side}`} position={[side * 0.205, 0, -0.03]} material={mats.brushed}>
+           <mesh key={`clasp-edge-${side}`} position={[side * 0.26, 0, -0.03]} material={mats.brushed}>
             <boxGeometry args={[0.012, 0.36, 0.03]} />
           </mesh>
         ))}
@@ -189,13 +200,13 @@ export function WatchModel({ variant }: Props) {
 
       {/* ---- Lugs ---- */}
       {[
-        { x: -0.33, y: 0.44 },
-        { x: 0.33, y: 0.44 },
-        { x: -0.33, y: -0.44 },
-        { x: 0.33, y: -0.44 },
+        { x: -0.365, y: 0.44 },
+        { x: 0.365, y: 0.44 },
+        { x: -0.365, y: -0.44 },
+        { x: 0.365, y: -0.44 },
       ].map(({ x, y }, i) => (
         <mesh key={`lug-${i}`} position={[x, y, 0]} castShadow>
-          <boxGeometry args={[0.1, 0.24, CASE_D * 0.85]} />
+          <boxGeometry args={[0.09, 0.24, CASE_D * 0.85]} />
           <meshStandardMaterial color={variant.metal} metalness={0.88} roughness={0.32} envMapIntensity={1.6} />
         </mesh>
       ))}
