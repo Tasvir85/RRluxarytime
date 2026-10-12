@@ -56,9 +56,10 @@ function buildBand(): { links: Link[]; step: number } {
     step = curve.getLength() / ROWS;
     const tangent = new THREE.Vector3();
     for (const column of COLUMNS) {
-      const count = column.stagger ? ROWS * 2 : ROWS;
+      // Staggered pieces sit between outer-link joints, giving a brick-laid pattern.
+      const count = column.stagger ? ROWS - 1 : ROWS;
       for (let i = 0; i < count; i += 1) {
-        const u = (i + 0.5) / count;
+        const u = column.stagger ? (i + 1) / ROWS : (i + 0.5) / ROWS;
         const p = curve.getPointAt(u);
         curve.getTangentAt(u, tangent);
         const width = BAND_W0 - BAND_TAPER * u;
@@ -103,7 +104,7 @@ export function WatchModel({ variant }: Props) {
     const s = band.step;
     return {
       outer: new RoundedBoxGeometry(BAND_W0 * 0.27, s * 0.97, 0.078, 3, 0.022),
-      polished: new RoundedBoxGeometry(BAND_W0 * 0.13, s * 0.46, 0.088, 3, 0.03),
+      polished: new RoundedBoxGeometry(BAND_W0 * 0.13, s * 0.9, 0.09, 3, 0.03),
       center: new RoundedBoxGeometry(BAND_W0 * 0.17, s * 0.94, 0.08, 3, 0.022),
       endLink: new RoundedBoxGeometry(BAND_W0 + GAP, 0.2, 0.12, 4, 0.035),
       claspBase: new RoundedBoxGeometry(0.5, 0.44, 0.05, 4, 0.02),
@@ -116,14 +117,14 @@ export function WatchModel({ variant }: Props) {
       brushed: new THREE.MeshStandardMaterial({
         color: variant.metal,
         metalness: 1,
-        roughness: 0.34,
-        envMapIntensity: 1.25,
+        roughness: 0.36,
+        envMapIntensity: 1.4,
       }),
       polished: new THREE.MeshStandardMaterial({
         color: variant.metal,
         metalness: 1,
-        roughness: 0.08,
-        envMapIntensity: 2,
+        roughness: 0.16,
+        envMapIntensity: 1.8,
       }),
     }),
     [variant.metal],
@@ -168,9 +169,6 @@ export function WatchModel({ variant }: Props) {
       {[1, -1].map((sign) => (
         <group key={`end-link-${sign}`} position={[0, sign * 0.535, -0.01]}>
           <mesh geometry={geo.endLink} material={mats.brushed} castShadow />
-          <mesh position={[0, 0, 0.055]} material={mats.polished}>
-            <boxGeometry args={[BAND_W0 * 0.32, 0.17, 0.018]} />
-          </mesh>
         </group>
       ))}
 
@@ -198,7 +196,7 @@ export function WatchModel({ variant }: Props) {
       ].map(({ x, y }, i) => (
         <mesh key={`lug-${i}`} position={[x, y, 0]} castShadow>
           <boxGeometry args={[0.1, 0.24, CASE_D * 0.85]} />
-          {metal}
+          <meshStandardMaterial color={variant.metal} metalness={1} roughness={0.28} envMapIntensity={1.5} />
         </mesh>
       ))}
 
