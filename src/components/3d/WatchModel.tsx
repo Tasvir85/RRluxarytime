@@ -9,47 +9,69 @@ type Props = { variant: ProductVariant };
 const CASE_R = 0.5;
 const CASE_D = 0.14;
 
-type BraceletLink = {
-  pos: [number, number, number];
-  rot: number;
-  width: number;
-  depth: number;
-};
+/** Bracelet geometry — five-row jubilee-style band matched to the packaging watch. */
+const BAND_W0 = 0.56; // width at the end links (fills the lug gap)
+const BAND_TAPER = 0.08; // narrower towards the clasp
+const ROWS = 18; // links per half
+const GAP = 0.0075;
 
-const BRACELET_COLUMNS = [
-  { offset: -0.4, width: 0.23, polished: false },
-  { offset: -0.19, width: 0.16, polished: true },
-  { offset: 0, width: 0.17, polished: true },
-  { offset: 0.19, width: 0.16, polished: true },
-  { offset: 0.4, width: 0.23, polished: false },
-] as const;
+type Column = { kind: "outer" | "polished" | "center"; offset: number; frac: number; stagger: boolean };
+const COLUMNS: Column[] = [
+  { kind: "outer", offset: -0.365, frac: 0.27, stagger: false },
+  { kind: "polished", offset: -0.1575, frac: 0.13, stagger: true },
+  { kind: "center", offset: 0, frac: 0.17, stagger: false },
+  { kind: "polished", offset: 0.1575, frac: 0.13, stagger: true },
+  { kind: "outer", offset: 0.365, frac: 0.27, stagger: false },
+];
+
+type Link = { key: string; kind: Column["kind"]; pos: [number, number, number]; rot: number; scaleX: number };
+
+/** Path of one bracelet half: from the end link, round the wrist, to the clasp. */
+function bandCurve(sign: 1 | -1) {
+  return new THREE.CatmullRomCurve3(
+    [
+      new THREE.Vector3(0, sign * 0.63, -0.01),
+      new THREE.Vector3(0, sign * 0.86, -0.17),
+      new THREE.Vector3(0, sign * 0.98, -0.56),
+      new THREE.Vector3(0, sign * 0.9, -1.02),
+      new THREE.Vector3(0, sign * 0.58, -1.4),
+      new THREE.Vector3(0, sign * 0.17, -1.575),
+    ],
+    false,
+    "centripetal",
+  );
+}
 
 /**
- * One half of a closed bracelet. A quadratic curve lets the band leave the
- * lugs naturally, bow around the wrist, and meet the clasp behind the case.
+ * Links are placed by arc length so consecutive rows touch exactly — no gaps
+ * anywhere around the wrist. Centre pieces are offset half a link, like a
+ * real jubilee bracelet.
  */
-function braceletLinks(sign: 1 | -1, count: number): BraceletLink[] {
-  const links: BraceletLink[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const t = (i + 0.35) / count;
-    const inverse = 1 - t;
-    const startY = sign * 0.54;
-    const controlY = sign * 1.52;
-    const endY = 0;
-    const controlZ = -0.24;
-    const endZ = -1.38;
-    const y = inverse * inverse * startY + 2 * inverse * t * controlY + t * t * endY;
-    const z = 2 * inverse * t * controlZ + t * t * endZ;
-    const tangentY = 2 * inverse * (controlY - startY) + 2 * t * (endY - controlY);
-    const tangentZ = 2 * inverse * controlZ + 2 * t * (endZ - controlZ);
-    links.push({
-      pos: [0, y, z],
-      rot: Math.atan2(tangentZ, tangentY),
-      width: 0.48 - t * 0.07,
-      depth: 0.105 - t * 0.015,
-    });
+function buildBand(): { links: Link[]; step: number } {
+  const links: Link[] = [];
+  let step = 0;
+  for (const sign of [1, -1] as const) {
+    const curve = bandCurve(sign);
+    step = curve.getLength() / ROWS;
+    const tangent = new THREE.Vector3();
+    for (const column of COLUMNS) {
+      const count = column.stagger ? ROWS * 2 : ROWS;
+      for (let i = 0; i < count; i += 1) {
+        const u = column.stagger ? (i + 0.5) / count : (i + 0.5) / count;
+        const p = curve.getPointAt(u);
+        curve.getTangentAt(u, tangent);
+        const width = BAND_W0 - BAND_TAPER * u;
+        links.push({
+          key: `${sign}-${column.kind}-${column.offset}-${i}`,
+          kind: column.kind,
+          pos: [column.offset * width, p.y, p.z],
+          rot: Math.atan2(tangent.z, tangent.y),
+          scaleX: width / BAND_W0,
+        });
+      }
+    }
   }
-  return links;
+  return { links, step };
 }
 
 export function WatchModel({ variant }: Props) {
