@@ -116,15 +116,15 @@ export function WatchModel({ variant }: Props) {
     () => ({
       brushed: new THREE.MeshStandardMaterial({
         color: variant.metal,
-        metalness: 1,
-        roughness: 0.36,
-        envMapIntensity: 1.4,
+        metalness: 0.86,
+        roughness: 0.4,
+        envMapIntensity: 1.5,
       }),
       polished: new THREE.MeshStandardMaterial({
         color: variant.metal,
-        metalness: 1,
-        roughness: 0.16,
-        envMapIntensity: 1.8,
+        metalness: 0.95,
+        roughness: 0.22,
+        envMapIntensity: 1.9,
       }),
     }),
     [variant.metal],
@@ -196,7 +196,7 @@ export function WatchModel({ variant }: Props) {
       ].map(({ x, y }, i) => (
         <mesh key={`lug-${i}`} position={[x, y, 0]} castShadow>
           <boxGeometry args={[0.1, 0.24, CASE_D * 0.85]} />
-          <meshStandardMaterial color={variant.metal} metalness={1} roughness={0.28} envMapIntensity={1.5} />
+          <meshStandardMaterial color={variant.metal} metalness={0.88} roughness={0.32} envMapIntensity={1.6} />
         </mesh>
       ))}
 
