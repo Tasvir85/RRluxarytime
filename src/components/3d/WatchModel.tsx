@@ -96,7 +96,38 @@ export function WatchModel({ variant }: Props) {
     [],
   );
 
-  const links = useMemo(() => [...braceletLinks(1, 16), ...braceletLinks(-1, 16)], []);
+  const band = useMemo(() => buildBand(), []);
+
+  // Shared, softly bevelled link shapes — sized once, then tapered per row.
+  const geo = useMemo(() => {
+    const s = band.step;
+    return {
+      outer: new RoundedBoxGeometry(BAND_W0 * 0.27, s * 0.97, 0.078, 3, 0.022),
+      polished: new RoundedBoxGeometry(BAND_W0 * 0.13, s * 0.46, 0.088, 3, 0.03),
+      center: new RoundedBoxGeometry(BAND_W0 * 0.17, s * 0.94, 0.08, 3, 0.022),
+      endLink: new RoundedBoxGeometry(BAND_W0 + GAP, 0.2, 0.12, 4, 0.035),
+      claspBase: new RoundedBoxGeometry(0.5, 0.44, 0.05, 4, 0.02),
+      claspCover: new RoundedBoxGeometry(0.4, 0.38, 0.026, 4, 0.012),
+    };
+  }, [band.step]);
+
+  const mats = useMemo(
+    () => ({
+      brushed: new THREE.MeshStandardMaterial({
+        color: variant.metal,
+        metalness: 1,
+        roughness: 0.34,
+        envMapIntensity: 1.25,
+      }),
+      polished: new THREE.MeshStandardMaterial({
+        color: variant.metal,
+        metalness: 1,
+        roughness: 0.08,
+        envMapIntensity: 2,
+      }),
+    }),
+    [variant.metal],
+  );
 
   useFrame(() => {
     const now = new Date();
@@ -120,61 +151,53 @@ export function WatchModel({ variant }: Props) {
 
   return (
     <group>
-      {/* ---- Bracelet ---- */}
-      {links.map((link, row) =>
-        BRACELET_COLUMNS.map((column, columnIndex) => (
-          <mesh
-            key={`link-${row}-${columnIndex}`}
-            position={[column.offset * link.width, link.pos[1], link.pos[2]]}
-            rotation={[link.rot, 0, 0]}
-            castShadow
-          >
-            <boxGeometry args={[link.width * column.width, 0.11, link.depth]} />
-            <meshStandardMaterial
-              color={variant.metal}
-              metalness={1}
-              roughness={column.polished ? 0.16 : 0.38}
-              envMapIntensity={column.polished ? 1.65 : 1.15}
-            />
-          </mesh>
-        )),
-      )}
+      {/* ---- Bracelet: brushed outer links, polished centre pieces ---- */}
+      {band.links.map((link) => (
+        <mesh
+          key={link.key}
+          geometry={geo[link.kind]}
+          material={link.kind === "polished" ? mats.polished : mats.brushed}
+          position={link.pos}
+          rotation={[link.rot, 0, 0]}
+          scale={[link.scaleX, 1, 1]}
+          castShadow
+        />
+      ))}
 
-      {/* Solid end links visually anchor the full-width bracelet to the lugs. */}
+      {/* Solid end links fill the lug gap and join the band to the case. */}
       {[1, -1].map((sign) => (
-        <group key={`end-link-${sign}`} position={[0, sign * 0.535, -0.005]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.49, 0.18, 0.13]} />
-            <meshStandardMaterial color={variant.metal} metalness={0.92} roughness={0.3} envMapIntensity={1.35} />
-          </mesh>
-          <mesh position={[0, 0, 0.071]}>
-            <boxGeometry args={[0.16, 0.15, 0.018]} />
-            <meshStandardMaterial color={variant.metal} metalness={1} roughness={0.08} envMapIntensity={2} />
+        <group key={`end-link-${sign}`} position={[0, sign * 0.535, -0.01]}>
+          <mesh geometry={geo.endLink} material={mats.brushed} castShadow />
+          <mesh position={[0, 0, 0.055]} material={mats.polished}>
+            <boxGeometry args={[BAND_W0 * 0.32, 0.17, 0.018]} />
           </mesh>
         </group>
       ))}
 
-      {/* Folding clasp closes the two bracelet halves behind the watch. */}
-      <group position={[0, 0, -1.38]} rotation={[Math.PI / 2, 0, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.43, 0.22, 0.11]} />
-          <meshStandardMaterial color={variant.metal} metalness={1} roughness={0.18} envMapIntensity={1.6} />
-        </mesh>
-        <mesh position={[0, 0.052, 0]}>
-          <boxGeometry args={[0.18, 0.014, 0.06]} />
+      {/* Folding deployant clasp joining both halves under the wrist. */}
+      <group position={[0, 0, -1.64]}>
+        <mesh geometry={geo.claspBase} material={mats.brushed} castShadow />
+        <mesh geometry={geo.claspCover} material={mats.polished} position={[0, 0, -0.03]} />
+        <mesh position={[0, 0.12, -0.045]}>
+          <boxGeometry args={[0.12, 0.022, 0.008]} />
           <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.14} />
         </mesh>
+        {[-1, 1].map((side) => (
+          <mesh key={`clasp-edge-${side}`} position={[side * 0.205, 0, -0.03]} material={mats.brushed}>
+            <boxGeometry args={[0.012, 0.36, 0.03]} />
+          </mesh>
+        ))}
       </group>
 
       {/* ---- Lugs ---- */}
       {[
-        { x: -0.28, y: 0.44 },
-        { x: 0.28, y: 0.44 },
-        { x: -0.28, y: -0.44 },
-        { x: 0.28, y: -0.44 },
+        { x: -0.33, y: 0.44 },
+        { x: 0.33, y: 0.44 },
+        { x: -0.33, y: -0.44 },
+        { x: 0.33, y: -0.44 },
       ].map(({ x, y }, i) => (
         <mesh key={`lug-${i}`} position={[x, y, 0]} castShadow>
-          <boxGeometry args={[0.09, 0.22, CASE_D * 0.8]} />
+          <boxGeometry args={[0.1, 0.24, CASE_D * 0.85]} />
           {metal}
         </mesh>
       ))}
