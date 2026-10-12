@@ -13,7 +13,7 @@ const CASE_D = 0.14;
 /** Bracelet geometry — five-row jubilee-style band matched to the packaging watch. */
 const BAND_W0 = 0.64; // substantial 25.6mm end link relative to the 40mm case
 const BAND_TAPER = 0.09;
-const ROWS = 22;
+const ROWS = 18;
 
 type Column = { kind: "outer" | "polished" | "center"; offset: number; frac: number; stagger: boolean };
 const COLUMNS: Column[] = [
@@ -66,7 +66,7 @@ function buildBand(): { links: Link[]; step: number } {
           key: `${sign}-${column.kind}-${column.offset}-${i}`,
           kind: column.kind,
           pos: [column.offset * width, p.y, p.z],
-           rot: Math.atan2(tangent.z, tangent.y) + (sign === -1 ? Math.PI : 0),
+          rot: Math.atan2(tangent.z, tangent.y) + (sign === -1 ? Math.PI : 0),
           scaleX: width / BAND_W0,
         });
       }
@@ -102,35 +102,55 @@ export function WatchModel({ variant }: Props) {
   const geo = useMemo(() => {
     const s = band.step;
     return {
-      outer: new RoundedBoxGeometry(BAND_W0 * 0.28, s * 0.985, 0.085, 3, 0.008),
-      polished: new RoundedBoxGeometry(BAND_W0 * 0.13, s * 0.98, 0.092, 3, 0.009),
-      center: new RoundedBoxGeometry(BAND_W0 * 0.15, s * 0.98, 0.092, 3, 0.009),
+      outer: new RoundedBoxGeometry(BAND_W0 * 0.28, s * 0.99, 0.085, 3, 0.004),
+      polished: new RoundedBoxGeometry(BAND_W0 * 0.13, s * 0.99, 0.088, 3, 0.005),
+      center: new RoundedBoxGeometry(BAND_W0 * 0.15, s * 0.99, 0.088, 3, 0.005),
       endLink: new RoundedBoxGeometry(BAND_W0, 0.12, 0.072, 3, 0.008),
-      endShoulder: new RoundedBoxGeometry(BAND_W0 * 0.28, 0.17, 0.09, 3, 0.009),
+      endShoulder: new RoundedBoxGeometry(BAND_W0 * 0.28, 0.13, 0.075, 3, 0.005),
       endCenter: new RoundedBoxGeometry(BAND_W0 * 0.13, 0.13, 0.016, 3, 0.004),
       claspBase: new RoundedBoxGeometry(0.55, 0.42, 0.062, 3, 0.009),
       claspCover: new RoundedBoxGeometry(0.53, 0.36, 0.025, 3, 0.006),
     };
   }, [band.step]);
 
+  const brushedTexture = useMemo(() => {
+    // Directional machining marks, not painted stripes: modulate only roughness.
+    const pixels = new Uint8Array(128 * 128 * 4);
+    for (let y = 0; y < 128; y += 1) {
+      for (let x = 0; x < 128; x += 1) {
+        const offset = (y * 128 + x) * 4;
+        const grain = 172 + Math.round(22 * Math.sin(x * 12.9898) + 5 * Math.sin(y * 3.17 + x));
+        pixels[offset] = grain;
+        pixels[offset + 1] = grain;
+        pixels[offset + 2] = grain;
+        pixels[offset + 3] = 255;
+      }
+    }
+    const texture = new THREE.DataTexture(pixels, 128, 128);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
+
   const mats = useMemo(
     () => ({
       brushed: new THREE.MeshStandardMaterial({
         color: variant.metal,
         metalness: 1,
-        roughness: 0.31,
+        roughness: 0.54,
+        roughnessMap: brushedTexture,
         envMapIntensity: 1.4,
       }),
       polished: new THREE.MeshPhysicalMaterial({
         color: variant.metal,
         metalness: 1,
-        roughness: 0.14,
+        roughness: 0.19,
         clearcoat: 0.4,
         clearcoatRoughness: 0.12,
         envMapIntensity: 1.6,
       }),
     }),
-    [variant.metal],
+    [variant.metal, brushedTexture],
   );
 
   useFrame(() => {
@@ -160,7 +180,7 @@ export function WatchModel({ variant }: Props) {
         <mesh
           key={link.key}
           geometry={geo[link.kind]}
-           material={link.kind === "outer" ? mats.brushed : mats.polished}
+          material={link.kind === "outer" ? mats.brushed : mats.polished}
           position={link.pos}
           rotation={[link.rot, 0, 0]}
           scale={[link.scaleX, 1, 1]}
@@ -192,7 +212,7 @@ export function WatchModel({ variant }: Props) {
           <meshStandardMaterial color={variant.accent} metalness={1} roughness={0.14} />
         </mesh>
         {[-1, 1].map((side) => (
-           <mesh key={`clasp-edge-${side}`} position={[side * 0.26, 0, -0.03]} material={mats.brushed}>
+          <mesh key={`clasp-edge-${side}`} position={[side * 0.26, 0, -0.03]} material={mats.brushed}>
             <boxGeometry args={[0.012, 0.36, 0.03]} />
           </mesh>
         ))}
