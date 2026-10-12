@@ -1,4 +1,5 @@
 import { useMemo, useRef } from "react";
+import { RoundedBoxGeometry } from "three-stdlib";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -57,7 +58,7 @@ function buildBand(): { links: Link[]; step: number } {
     for (const column of COLUMNS) {
       const count = column.stagger ? ROWS * 2 : ROWS;
       for (let i = 0; i < count; i += 1) {
-        const u = column.stagger ? (i + 0.5) / count : (i + 0.5) / count;
+        const u = (i + 0.5) / count;
         const p = curve.getPointAt(u);
         curve.getTangentAt(u, tangent);
         const width = BAND_W0 - BAND_TAPER * u;
